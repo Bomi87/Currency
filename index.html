@@ -196,10 +196,13 @@
 
   .input-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 10px;
+    column-gap: 12px;
+    row-gap: 14px;
+    align-items: start;
   }
 
   .input-col {
+    min-width: 0;
     gap: 8px;
   }
 
@@ -209,7 +212,9 @@
   }
 
   .input-col input {
-    padding: 8px 10px;
+    width: 100%;
+    min-width: 0;
+    padding: 6px 6px;
     font-size: 13px;
   }
 
