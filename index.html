@@ -184,19 +184,39 @@
       }
     }
 
-    @media (max-width: 480px) {
-      .result-box {
-  font-size: 14px;
-  line-height: 1.7;
-}
-      .input-grid {
-        grid-template-columns: 1fr;
-      }
+@media (max-width: 480px) {
+  .result-box {
+    font-size: 14px;
+    line-height: 1.7;
+  }
 
-      body {
-        padding: 14px;
-      }
-    }
+  .status {
+    font-size: 13px;
+  }
+
+  .input-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 10px;
+  }
+
+  .input-col {
+    gap: 8px;
+  }
+
+  .col-header {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  .input-col input {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  body {
+    padding: 14px;
+  }
+}
   </style>
 </head>
 <body>
