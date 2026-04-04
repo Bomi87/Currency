@@ -26,8 +26,22 @@
       margin-bottom: 20px;
     }
 
+    .top-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+
+    .logo {
+      height: 42px;
+      width: auto;
+      display: block;
+      object-fit: contain;
+    }
+
     h1 {
-      margin-top: 0;
+      margin: 0;
       font-size: 28px;
     }
 
@@ -87,9 +101,26 @@
       cursor: not-allowed;
     }
 
-    .grid8 {
+    .input-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
+      gap: 10px 14px;
+      align-items: start;
+    }
+
+    .col-header {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .night-header {
+      color: #1f6feb;
+    }
+
+    .input-col {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
     }
 
@@ -121,14 +152,23 @@
     }
 
     @media (max-width: 768px) {
-      .grid8 {
+      .input-grid {
         grid-template-columns: repeat(2, 1fr);
+      }
+
+      .top-brand {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
 
     @media (max-width: 480px) {
-      .grid8 {
+      .input-grid {
         grid-template-columns: 1fr;
+      }
+
+      body {
+        padding: 14px;
       }
     }
   </style>
@@ -136,17 +176,20 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>Pilot Currency Checker</h1>
+      <div class="top-brand">
+        <img src="./SK_LOGO.png" alt="SK Logo" class="logo">
+        <h1>Pilot Currency Checker</h1>
+      </div>
       <div class="muted">
-        조종사 선택 후 조회하고, L2:O9 값을 입력한 뒤 계산하면 결과가 갱신됩니다.
+        PILOT 선택 후 조회하고, 입력값을 넣은 뒤 계산하면 결과가 갱신됩니다.
       </div>
     </div>
 
     <div class="card">
-      <h2>1. 조종사 조회</h2>
+      <h2>1. PILOT 조회</h2>
       <div class="row">
         <div class="field">
-          <label for="pilotSelect">조종사 이름</label>
+          <label for="pilotSelect">PILOT 이름</label>
           <select id="pilotSelect">
             <option value="">목록 불러오는 중...</option>
           </select>
@@ -159,14 +202,17 @@
     </div>
 
     <div class="card">
-      <h2>2. 입력값 (L2:O9)</h2>
+      <h2>2. 입력값 (P2:S4)</h2>
       <div class="muted" style="margin-bottom:10px;">
-        아래 값은 구글시트의 L2:O9에 그대로 입력됩니다.
+        아래 값은 구글시트의 P2:S4에 그대로 입력됩니다.
       </div>
-      <div class="grid8" id="inputGrid"></div>
+
+      <div class="input-grid" id="inputGrid"></div>
+
       <div class="row" style="margin-top:16px;">
         <button class="secondary" id="btnCalc" onclick="calculateData()">계산</button>
       </div>
+
       <div id="calcStatus" class="status"></div>
     </div>
 
@@ -177,33 +223,45 @@
   </div>
 
   <script>
-    // 본인 Apps Script 웹앱 URL로 교체
-  const API_URL = "https://script.google.com/macros/s/AKfycbwBUy069fercilRiONLiKiR0HTSBImuBYSUt0BltCVfR2L4wouXOs58YO89LozPCehOdw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzg-sWVNyQ1yV2YyJqqua9Ufme4Anp7u1ocBXkamDRDByLTP6K_tjon08uaicp3ZP9Qlg/exec";
+
+    const headers = [
+      { key: "P", title: "T/O-Day", night: false },
+      { key: "Q", title: "T/O-Night", night: true },
+      { key: "R", title: "L/D-Day", night: false },
+      { key: "S", title: "L/D-Night", night: true }
+    ];
 
     function buildInputGrid() {
       const grid = document.getElementById("inputGrid");
       grid.innerHTML = "";
 
-      for (let r = 2; r <= 9; r++) {
-        for (const col of ["L", "M", "N", "O"]) {
-          const cellName = col + r;
+      headers.forEach(h => {
+        const col = document.createElement("div");
+        col.className = "input-col";
 
-          const wrap = document.createElement("div");
-          wrap.className = "field";
-          wrap.innerHTML = `
-            <label for="cell_${cellName}">${cellName}</label>
-            <input type="text" id="cell_${cellName}" placeholder="${cellName}" />
-          `;
-          grid.appendChild(wrap);
+        const head = document.createElement("div");
+        head.className = "col-header" + (h.night ? " night-header" : "");
+        head.textContent = h.title;
+        col.appendChild(head);
+
+        for (let r = 2; r <= 4; r++) {
+          const input = document.createElement("input");
+          input.type = "text";
+          input.id = `cell_${h.key}${r}`;
+          input.placeholder = "";
+          col.appendChild(input);
         }
-      }
+
+        grid.appendChild(col);
+      });
     }
 
     function getInputValues() {
       const values = [];
-      for (let r = 2; r <= 9; r++) {
+      for (let r = 2; r <= 4; r++) {
         const row = [];
-        for (const col of ["L", "M", "N", "O"]) {
+        for (const col of ["P", "Q", "R", "S"]) {
           row.push(document.getElementById(`cell_${col}${r}`).value.trim());
         }
         values.push(row);
@@ -212,11 +270,13 @@
     }
 
     function setInputValues(values) {
+      clearInputFields();
+
       if (!Array.isArray(values)) return;
 
       for (let r = 0; r < values.length; r++) {
         for (let c = 0; c < values[r].length; c++) {
-          const col = ["L", "M", "N", "O"][c];
+          const col = ["P", "Q", "R", "S"][c];
           const rowNo = r + 2;
           const el = document.getElementById(`cell_${col}${rowNo}`);
           if (el) el.value = values[r][c] ?? "";
@@ -224,16 +284,33 @@
       }
     }
 
+    function clearInputFields() {
+      for (let r = 2; r <= 4; r++) {
+        for (const col of ["P", "Q", "R", "S"]) {
+          const el = document.getElementById(`cell_${col}${r}`);
+          if (el) el.value = "";
+        }
+      }
+    }
+
     function renderResult(data) {
       const result = document.getElementById("result");
 
+      const dayTO = (data.dayTO || []).join(" / ");
+      const nightTO = (data.nightTO || []).join(" / ");
+      const dayLD = (data.dayLD || []).join(" / ");
+      const nightLD = (data.nightLD || []).join(" / ");
+
       result.innerHTML = `
-        <div class="result-line"><strong>조종사 이름:</strong> ${data.pilotDisplay || ""}</div>
-        <div class="result-line"><strong>DAY T/O:</strong> ${(data.dayTO || []).join(", ")}</div>
-        <div class="result-line"><strong>NIGHT T/O:</strong> ${(data.nightTO || []).join(", ")}</div>
-        <div class="result-line"><strong>DAY L/D:</strong> ${(data.dayLD || []).join(", ")}</div>
-        <div class="result-line"><strong>NIGHT L/D:</strong> ${(data.nightLD || []).join(", ")}</div>
-        <div class="result-line"><strong>DUE DATE:</strong> ${data.dueDateMain || ""} (${data.dueDateSub || ""})</div>
+        <div class="result-line">
+          <strong>PILOT 이름:</strong> ${data.pilotDisplay || ""}
+          &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;
+          <strong>DUE DATE:</strong> ${data.dueDateMain || ""} (${data.dueDateSub || ""})
+        </div>
+        <div class="result-line"><strong>DAY T/O:</strong> ${dayTO}</div>
+        <div class="result-line"><strong>NIGHT T/O:</strong> ${nightTO}</div>
+        <div class="result-line"><strong>DAY L/D:</strong> ${dayLD}</div>
+        <div class="result-line"><strong>NIGHT L/D:</strong> ${nightLD}</div>
       `;
     }
 
@@ -268,7 +345,7 @@
 
       try {
         status.className = "status";
-        status.textContent = "조종사 목록 불러오는 중...";
+        status.textContent = "PILOT 목록 불러오는 중...";
 
         const result = await callApi({
           action: "getPilots"
@@ -285,11 +362,21 @@
         });
 
         status.className = "status ok";
-        status.textContent = "조종사 목록 로드 완료";
+        status.textContent = "PILOT 목록 로드 완료";
       } catch (err) {
         select.innerHTML = '<option value="">목록 불러오기 실패</option>';
         status.className = "status err";
         status.textContent = err.message;
+      }
+    }
+
+    async function resetInputsOnSheet() {
+      try {
+        await callApi({
+          action: "resetInputs"
+        });
+      } catch (err) {
+        console.error("resetInputs 오류:", err);
       }
     }
 
@@ -299,7 +386,7 @@
 
       if (!pilotName) {
         status.className = "status err";
-        status.textContent = "조종사를 선택하세요.";
+        status.textContent = "PILOT을 선택하세요.";
         return;
       }
 
@@ -307,6 +394,8 @@
         document.getElementById("btnSearch").disabled = true;
         status.className = "status";
         status.textContent = "조회 중...";
+
+        clearInputFields();
 
         const result = await callApi({
           action: "search",
@@ -332,7 +421,7 @@
 
       if (!pilotName) {
         status.className = "status err";
-        status.textContent = "먼저 조종사를 선택하세요.";
+        status.textContent = "먼저 PILOT을 선택하세요.";
         return;
       }
 
@@ -361,8 +450,19 @@
       }
     }
 
+    window.addEventListener("beforeunload", function () {
+      navigator.sendBeacon(
+        API_URL,
+        new Blob([JSON.stringify({ action: "resetInputs" })], {
+          type: "text/plain;charset=utf-8"
+        })
+      );
+    });
+
     buildInputGrid();
+    clearInputFields();
     loadPilotList();
+    resetInputsOnSheet();
   </script>
 </body>
 </html>
