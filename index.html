@@ -133,6 +133,17 @@
       font-size: 15px;
     }
 
+    .result-box {
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+.result-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: baseline;
+}
     .muted {
       color: #666;
       font-size: 13px;
@@ -174,6 +185,10 @@
     }
 
     @media (max-width: 480px) {
+      .result-box {
+  font-size: 14px;
+  line-height: 1.7;
+}
       .input-grid {
         grid-template-columns: 1fr;
       }
@@ -255,7 +270,7 @@
 
         for (let r = 2; r <= 4; r++) {
           const input = document.createElement("input");
-          input.type = "text";
+         input.type = "date";
           input.id = `cell_${h.key}${r}`;
           input.placeholder = "";
           col.appendChild(input);
@@ -325,7 +340,7 @@
       const nightLD = styleDateList(data.nightLD || [], "night-value");
 
       result.innerHTML = `
-       <div class="result-line">
+    <div class="result-line">
   <strong>PILOT:</strong> ${escapeHtml(data.pilotDisplay || "")}
   &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;
   <strong>DUE DATE:</strong>
