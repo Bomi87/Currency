@@ -134,16 +134,17 @@
     }
 
     .result-box {
-  overflow-wrap: anywhere;
-  word-break: keep-all;
-}
+      overflow-wrap: anywhere;
+      word-break: keep-all;
+    }
 
-.result-top {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 10px;
-  align-items: baseline;
-}
+    .result-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      align-items: baseline;
+    }
+
     .muted {
       color: #666;
       font-size: 13px;
@@ -168,10 +169,10 @@
       text-decoration: underline;
     }
 
- .night-value {
-  color: #1f6feb;
-  font-weight: normal;
-}
+    .night-value {
+      color: #1f6feb;
+      font-weight: normal;
+    }
 
     @media (max-width: 768px) {
       .input-grid {
@@ -184,44 +185,44 @@
       }
     }
 
-@media (max-width: 480px) {
-  .result-box {
-    font-size: 14px;
-    line-height: 1.7;
-  }
+    @media (max-width: 480px) {
+      .result-box {
+        font-size: 14px;
+        line-height: 1.7;
+      }
 
-  .status {
-    font-size: 13px;
-  }
+      .status {
+        font-size: 13px;
+      }
 
-  .input-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 26px;
-    row-gap: 14px;
-    align-items: start;
-  }
+      .input-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 26px;
+        row-gap: 14px;
+        align-items: start;
+      }
 
-  .input-col {
-    min-width: 0;
-    gap: 8px;
-  }
+      .input-col {
+        min-width: 0;
+        gap: 8px;
+      }
 
-  .col-header {
-    font-size: 13px;
-    margin-bottom: 2px;
-  }
+      .col-header {
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
 
-  .input-col input {
-    width: 100%;
-    min-width: 0;
-    padding: 6px 6px;
-    font-size: 13px;
-  }
+      .input-col input {
+        width: 100%;
+        min-width: 0;
+        padding: 6px 6px;
+        font-size: 13px;
+      }
 
-  body {
-    padding: 14px;
-  }
-}
+      body {
+        padding: 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -232,17 +233,16 @@
         <h1>Pilot Currency Checker</h1>
       </div>
       <div class="muted">
-        PILOT 선택 후, 입력값을 넣은 뒤 '계산' 버튼 누르면 결과가 갱신됩니다.
+        Select a pilot, enter the values, and click the "Calculate" button to update the results.
       </div>
     </div>
 
     <div class="card">
-      <h2>1. PILOT 조회</h2>
+      <h2>1. Pilot Search</h2>
       <div class="row">
         <div class="field">
-    
           <select id="pilotSelect" onchange="handlePilotChange()">
-            <option value="">목록 불러오는 중...</option>
+            <option value="">Loading pilot list...</option>
           </select>
         </div>
       </div>
@@ -250,23 +250,22 @@
     </div>
 
     <div class="card">
-      <h2>2. 입력값</h2>
+      <h2>2. Input Values</h2>
       <div class="muted" style="margin-bottom:10px;">
-       
       </div>
 
       <div class="input-grid" id="inputGrid"></div>
 
       <div class="row" style="margin-top:16px;">
-        <button class="secondary" id="btnCalc" onclick="calculateData()">계산</button>
+        <button class="secondary" id="btnCalc" onclick="calculateData()">Calculate</button>
       </div>
 
       <div id="calcStatus" class="status"></div>
     </div>
 
     <div class="card">
-      <h2>3. 결과</h2>
-      <div id="result" class="result-box">조회 결과가 여기에 표시됩니다.</div>
+      <h2>3. Results</h2>
+      <div id="result" class="result-box">Search results will be displayed here.</div>
     </div>
   </div>
 
@@ -295,7 +294,7 @@
 
         for (let r = 2; r <= 4; r++) {
           const input = document.createElement("input");
-         input.type = "date";
+          input.type = "date";
           input.id = `cell_${h.key}${r}`;
           input.placeholder = "";
           col.appendChild(input);
@@ -364,33 +363,33 @@
       const dayLD = styleDateList(data.dayLD || []);
       const nightLD = styleDateList(data.nightLD || [], "night-value");
 
-result.innerHTML = `
-  <div class="result-line">
-    🧑‍✈️ <strong>PILOT:</strong> ${escapeHtml(data.pilotDisplay || "")}
-  </div>
-  <div class="result-line">
-    ✈️ <strong>DUE DATE:</strong>
-    <span class="due-date-value">
-      ${escapeHtml(data.dueDateMain || "")} (${escapeHtml(data.dueDateSub || "")})
-    </span>
-  </div>
-  <div class="result-line">
-    <strong>-DAY T/O:</strong><br>
-    ${dayTO}
-  </div>
-  <div class="result-line">
-    <strong>-NIGHT T/O:</strong><br>
-    ${nightTO}
-  </div>
-  <div class="result-line">
-    <strong>-DAY L/D:</strong><br>
-    ${dayLD}
-  </div>
-  <div class="result-line">
-    <strong>-NIGHT L/D:</strong><br>
-    ${nightLD}
-  </div>
-`;
+      result.innerHTML = `
+        <div class="result-line">
+          🧑‍✈️ <strong>PILOT:</strong> ${escapeHtml(data.pilotDisplay || "")}
+        </div>
+        <div class="result-line">
+          ✈️ <strong>DUE DATE:</strong>
+          <span class="due-date-value">
+            ${escapeHtml(data.dueDateMain || "")} (${escapeHtml(data.dueDateSub || "")})
+          </span>
+        </div>
+        <div class="result-line">
+          <strong>-DAY T/O:</strong><br>
+          ${dayTO}
+        </div>
+        <div class="result-line">
+          <strong>-NIGHT T/O:</strong><br>
+          ${nightTO}
+        </div>
+        <div class="result-line">
+          <strong>-DAY L/D:</strong><br>
+          ${dayLD}
+        </div>
+        <div class="result-line">
+          <strong>-NIGHT L/D:</strong><br>
+          ${nightLD}
+        </div>
+      `;
     }
 
     async function callApi(payload) {
@@ -408,11 +407,11 @@ result.innerHTML = `
       try {
         json = JSON.parse(text);
       } catch (e) {
-        throw new Error("서버 응답이 JSON 형식이 아닙니다.");
+        throw new Error("The server response is not in JSON format.");
       }
 
       if (!json.success) {
-        throw new Error(json.message || "처리 중 오류가 발생했습니다.");
+        throw new Error(json.message || "An error occurred while processing the request.");
       }
 
       return json;
@@ -424,14 +423,14 @@ result.innerHTML = `
 
       try {
         status.className = "status";
-        status.textContent = "PILOT 목록 불러오는 중...";
+        status.textContent = "Loading pilot list...";
 
         const result = await callApi({
           action: "getPilots"
         });
 
         const pilots = result.pilots || [];
-        select.innerHTML = '<option value="">선택하세요</option>';
+        select.innerHTML = '<option value="">Please select</option>';
 
         pilots.forEach(name => {
           const opt = document.createElement("option");
@@ -441,9 +440,9 @@ result.innerHTML = `
         });
 
         status.className = "status ok";
-        status.textContent = "PILOT 목록 로드 완료";
+        status.textContent = "Pilot list loaded successfully.";
       } catch (err) {
-        select.innerHTML = '<option value="">목록 불러오기 실패</option>';
+        select.innerHTML = '<option value="">Failed to load list</option>';
         status.className = "status err";
         status.textContent = err.message;
       }
@@ -455,7 +454,7 @@ result.innerHTML = `
           action: "resetInputs"
         });
       } catch (err) {
-        console.error("resetInputs 오류:", err);
+        console.error("resetInputs error:", err);
       }
     }
 
@@ -465,7 +464,7 @@ result.innerHTML = `
 
       if (!pilotName) {
         clearInputFields();
-        document.getElementById("result").textContent = "조회 결과가 여기에 표시됩니다.";
+        document.getElementById("result").textContent = "Search results will be displayed here.";
         status.className = "status";
         status.textContent = "";
         return;
@@ -473,7 +472,7 @@ result.innerHTML = `
 
       try {
         status.className = "status";
-        status.textContent = "조회 중...";
+        status.textContent = "Searching...";
 
         clearInputFields();
 
@@ -486,7 +485,7 @@ result.innerHTML = `
         setInputValues(result.data.inputValues || []);
 
         status.className = "status ok";
-        status.textContent = "조회 완료";
+        status.textContent = "Search completed.";
       } catch (err) {
         status.className = "status err";
         status.textContent = err.message;
@@ -499,14 +498,14 @@ result.innerHTML = `
 
       if (!pilotName) {
         status.className = "status err";
-        status.textContent = "먼저 PILOT을 선택하세요.";
+        status.textContent = "Please select a pilot first.";
         return;
       }
 
       try {
         document.getElementById("btnCalc").disabled = true;
         status.className = "status";
-        status.textContent = "계산 중...";
+        status.textContent = "Calculating...";
 
         const inputValues = getInputValues();
 
@@ -519,7 +518,7 @@ result.innerHTML = `
         renderResult(result.data);
 
         status.className = "status ok";
-        status.textContent = "계산 완료";
+        status.textContent = "Calculation completed.";
       } catch (err) {
         status.className = "status err";
         status.textContent = err.message;
