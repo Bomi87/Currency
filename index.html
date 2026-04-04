@@ -151,6 +151,17 @@
       margin-bottom: 6px;
     }
 
+    .due-date-value {
+      color: #7b2cff;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+
+    .night-value {
+      color: #1f6feb;
+      font-weight: 600;
+    }
+
     @media (max-width: 768px) {
       .input-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -181,7 +192,7 @@
         <h1>Pilot Currency Checker</h1>
       </div>
       <div class="muted">
-        PILOT 선택 후 조회하고, 입력값을 넣은 뒤 계산하면 결과가 갱신됩니다.
+        PILOT 선택 후, 입력값을 넣은 뒤 계산하면 결과가 갱신됩니다.
       </div>
     </div>
 
@@ -190,21 +201,18 @@
       <div class="row">
         <div class="field">
           <label for="pilotSelect">PILOT 이름</label>
-          <select id="pilotSelect">
+          <select id="pilotSelect" onchange="handlePilotChange()">
             <option value="">목록 불러오는 중...</option>
           </select>
-        </div>
-        <div>
-          <button id="btnSearch" onclick="searchPilot()">조회</button>
         </div>
       </div>
       <div id="searchStatus" class="status"></div>
     </div>
 
     <div class="card">
-      <h2>2. 입력값 (P2:S4)</h2>
+      <h2>2. 입력값</h2>
       <div class="muted" style="margin-bottom:10px;">
-        아래 값은 구글시트의 P2:S4에 그대로 입력됩니다.
+       
       </div>
 
       <div class="input-grid" id="inputGrid"></div>
@@ -223,7 +231,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyNW-V_K_1W3ub91s_UjbwbF7ucT5GaY4xNCl1Z3buE77N7_hnZZS6Z0AEWMKu4dC5CxA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzg-sWVNyQ1yV2YyJqqua9Ufme4Anp7u1ocBXkamDRDByLTP6K_tjon08uaicp3ZP9Qlg/exec?v=20260404_2";
 
     const headers = [
       { key: "P", title: "T/O-Day", night: false },
@@ -293,24 +301,41 @@
       }
     }
 
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function styleDateList(values, className = "") {
+      return (values || [])
+        .map(v => `<span class="${className}">${escapeHtml(v)}</span>`)
+        .join(" / ");
+    }
+
     function renderResult(data) {
       const result = document.getElementById("result");
 
-      const dayTO = (data.dayTO || []).join(" / ");
-      const nightTO = (data.nightTO || []).join(" / ");
-      const dayLD = (data.dayLD || []).join(" / ");
-      const nightLD = (data.nightLD || []).join(" / ");
+      const dayTO = styleDateList(data.dayTO || []);
+      const nightTO = styleDateList(data.nightTO || [], "night-value");
+      const dayLD = styleDateList(data.dayLD || []);
+      const nightLD = styleDateList(data.nightLD || [], "night-value");
 
       result.innerHTML = `
         <div class="result-line">
-          <strong>PILOT 이름:</strong> ${data.pilotDisplay || ""}
+          <strong>PILOT:</strong> ${escapeHtml(data.pilotDisplay || "")}
           &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;
-          <strong>DUE DATE:</strong> ${data.dueDateMain || ""} (${data.dueDateSub || ""})
+          <strong>DUE DATE:</strong>
+          <span class="due-date-value">${escapeHtml(data.dueDateMain || "")}</span>
+          (${escapeHtml(data.dueDateSub || "")})
         </div>
-        <div class="result-line"><strong>DAY T/O:</strong> ${dayTO}</div>
-        <div class="result-line"><strong>NIGHT T/O:</strong> ${nightTO}</div>
-        <div class="result-line"><strong>DAY L/D:</strong> ${dayLD}</div>
-        <div class="result-line"><strong>NIGHT L/D:</strong> ${nightLD}</div>
+        <div class="result-line"><strong>-DAY T/O:</strong> ${dayTO}</div>
+        <div class="result-line"><strong>-NIGHT T/O:</strong> ${nightTO}</div>
+        <div class="result-line"><strong>-DAY L/D:</strong> ${dayLD}</div>
+        <div class="result-line"><strong>-NIGHT L/D:</strong> ${nightLD}</div>
       `;
     }
 
@@ -380,18 +405,19 @@
       }
     }
 
-    async function searchPilot() {
+    async function handlePilotChange() {
       const pilotName = document.getElementById("pilotSelect").value;
       const status = document.getElementById("searchStatus");
 
       if (!pilotName) {
-        status.className = "status err";
-        status.textContent = "PILOT을 선택하세요.";
+        clearInputFields();
+        document.getElementById("result").textContent = "조회 결과가 여기에 표시됩니다.";
+        status.className = "status";
+        status.textContent = "";
         return;
       }
 
       try {
-        document.getElementById("btnSearch").disabled = true;
         status.className = "status";
         status.textContent = "조회 중...";
 
@@ -410,8 +436,6 @@
       } catch (err) {
         status.className = "status err";
         status.textContent = err.message;
-      } finally {
-        document.getElementById("btnSearch").disabled = false;
       }
     }
 
