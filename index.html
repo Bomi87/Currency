@@ -14,7 +14,7 @@
     }
 
     .wrap {
-      max-width: 960px;
+      max-width: 1100px;
       margin: 0 auto;
     }
 
@@ -147,13 +147,6 @@
       word-break: keep-all;
     }
 
-    .result-top {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 10px;
-      align-items: baseline;
-    }
-
     .muted {
       color: #666;
       font-size: 13px;
@@ -189,13 +182,14 @@
     }
 
     .top-info-box {
-      min-width: 320px;
-      max-width: 360px;
+      min-width: 460px;
+      max-width: 520px;
       background: #f8fbff;
       border: 1px solid #d6e7ff;
       border-radius: 24px;
       padding: 14px 18px;
       box-sizing: border-box;
+      overflow-x: auto;
     }
 
     .top-info-loading {
@@ -207,12 +201,14 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
+      table-layout: auto;
     }
 
     .top-info-table td {
       padding: 6px 4px;
       vertical-align: top;
       border-bottom: 1px solid #e8f0fb;
+      white-space: nowrap;
     }
 
     .top-info-table tr:last-child td {
@@ -220,15 +216,22 @@
     }
 
     .top-info-label {
-      width: 34%;
+      width: 22%;
       font-weight: 700;
       color: #1f3b64;
       white-space: nowrap;
     }
 
+    .top-info-mid {
+      width: 24%;
+      color: #7b2cff;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
     .top-info-value {
       color: #222;
-      word-break: break-word;
+      white-space: nowrap;
     }
 
     @media (max-width: 768px) {
@@ -326,8 +329,7 @@
 
     <div class="card">
       <h2>2. Input Values</h2>
-      <div class="muted" style="margin-bottom:10px;">
-      </div>
+      <div class="muted" style="margin-bottom:10px;"></div>
 
       <div class="input-grid" id="inputGrid"></div>
 
@@ -345,7 +347,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxQV5WkepRQBxsqN4obEAZ1m8BnblRxWW0PCxAh3VhJ1useKr4dbyrb2GDjNKX0TVxoyw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzp2s5THV2Ge37mO62kHcQ7lEKWzVnxFT1VDQF_hjArpM9VWPwxOH0R3sndWpiwvbzTGA/exec";
 
     const headers = [
       { key: "P", title: "T/O-Day", night: false },
@@ -371,7 +373,6 @@
           const input = document.createElement("input");
           input.type = "date";
           input.id = `cell_${h.key}${r}`;
-          input.placeholder = "";
 
           if (h.night) {
             input.classList.add("night-input");
@@ -513,7 +514,7 @@
         html += `
           <tr>
             <td class="top-info-label">${escapeHtml(c1)}</td>
-            <td class="top-info-value">${escapeHtml(c2)}</td>
+            <td class="top-info-mid">${escapeHtml(c2)}</td>
             <td class="top-info-value">${escapeHtml(c3)}</td>
           </tr>
         `;
@@ -550,6 +551,7 @@
 
         throw new Error(rawMessage || "An error occurred while processing the request.");
       }
+
       return json;
     }
 
