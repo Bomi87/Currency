@@ -215,24 +215,24 @@
       border-bottom: none;
     }
 
-    .top-info-label {
-      width: 22%;
-      font-weight: 700;
-      color: #1f3b64;
-      white-space: nowrap;
-    }
+.top-info-label {
+  width: 22%;
+  font-weight: 700;
+  color: #7b2cff;
+  white-space: nowrap;
+}
 
-    .top-info-mid {
-      width: 24%;
-      color: #7b2cff;
-      white-space: nowrap;
-      font-weight: 700;
-    }
+.top-info-mid {
+  width: 24%;
+  color: #7b2cff;
+  white-space: nowrap;
+  font-weight: 700;
+}
 
-    .top-info-value {
-      color: #222;
-      white-space: nowrap;
-    }
+.top-info-value {
+  color: #7b2cff;
+  white-space: nowrap;
+}
 
     @media (max-width: 768px) {
       .input-grid {
@@ -511,13 +511,13 @@
         const c2 = row[1] ?? "";
         const c3 = row[2] ?? "";
 
-        html += `
-          <tr>
-            <td class="top-info-label">${escapeHtml(c1)}</td>
-            <td class="top-info-mid">${escapeHtml(c2)}</td>
-            <td class="top-info-value">${escapeHtml(c3)}</td>
-          </tr>
-        `;
+   html += `
+  <tr>
+    <td class="top-info-label">✈️ ${escapeHtml(c1)}</td>
+    <td class="top-info-mid">${escapeHtml(c2)}</td>
+    <td class="top-info-value">${escapeHtml(c3)}</td>
+  </tr>
+`;
       });
 
       html += `</table>`;
