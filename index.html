@@ -197,7 +197,13 @@
       color: #666;
       font-size: 13px;
     }
-
+.top-info-title {
+  color: #7b2cff;
+  font-weight: 700;
+  font-size: inherit;
+  margin-bottom: 6px;
+  white-space: nowrap;
+}
 .top-info-table {
   width: 100%;
   border-collapse: collapse;
@@ -347,7 +353,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzp2s5THV2Ge37mO62kHcQ7lEKWzVnxFT1VDQF_hjArpM9VWPwxOH0R3sndWpiwvbzTGA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyDbsxDLaIZ44CkY_s25CpSmzSeOMQlR6GhmDyvsPhJQVf5RBSHLfs4rTejlC3Va2Ug0Q/exec";
 
     const headers = [
       { key: "P", title: "T/O-Day", night: false },
@@ -496,33 +502,32 @@
       `;
     }
 
-    function renderTopInfo(values) {
-      const box = document.getElementById("topInfoBox");
+   function renderTopInfo(values) {
+  const box = document.getElementById("topInfoBox");
 
-      if (!Array.isArray(values) || values.length === 0) {
-        box.innerHTML = `<div class="top-info-loading">No data</div>`;
-        return;
-      }
+  if (!Array.isArray(values) || values.length === 0) {
+    box.innerHTML = `<div class="top-info-loading">No data</div>`;
+    return;
+  }
 
-      let html = `<table class="top-info-table">`;
+  let html = `<div class="top-info-title">Updated upto~</div>`;
+  html += `<table class="top-info-table">`;
 
-      values.forEach(row => {
-        const c1 = row[0] ?? "";
-        const c2 = row[1] ?? "";
-        const c3 = row[2] ?? "";
+  values.forEach(row => {
+    const c1 = row[0] ?? "";
+    const c2 = row[1] ?? "";
 
-   html += `
-  <tr>
-  <td class="top-info-label">✈️&nbsp;${escapeHtml(c1)}</td>
-    <td class="top-info-mid">${escapeHtml(c2)}</td>
-    <td class="top-info-value">${escapeHtml(c3)}</td>
-  </tr>
-`;
-      });
+    html += `
+      <tr>
+        <td class="top-info-label">✈️&nbsp;${escapeHtml(c1)}</td>
+        <td class="top-info-value">${escapeHtml(c2)}</td>
+      </tr>
+    `;
+  });
 
-      html += `</table>`;
-      box.innerHTML = html;
-    }
+  html += `</table>`;
+  box.innerHTML = html;
+}
 
     async function callApi(payload) {
       const res = await fetch(API_URL, {
