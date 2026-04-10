@@ -26,6 +26,18 @@
       margin-bottom: 20px;
     }
 
+    .top-card-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .top-card-left {
+      flex: 1;
+      min-width: 0;
+    }
+
     .top-brand {
       display: flex;
       align-items: center;
@@ -131,9 +143,6 @@
       padding: 16px;
       line-height: 1.9;
       font-size: 15px;
-    }
-
-    .result-box {
       overflow-wrap: anywhere;
       word-break: keep-all;
     }
@@ -179,14 +188,67 @@
       font-weight: 600;
     }
 
+    .top-info-box {
+      min-width: 320px;
+      max-width: 360px;
+      background: #f8fbff;
+      border: 1px solid #d6e7ff;
+      border-radius: 24px;
+      padding: 14px 18px;
+      box-sizing: border-box;
+    }
+
+    .top-info-loading {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .top-info-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .top-info-table td {
+      padding: 6px 4px;
+      vertical-align: top;
+      border-bottom: 1px solid #e8f0fb;
+    }
+
+    .top-info-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .top-info-label {
+      width: 34%;
+      font-weight: 700;
+      color: #1f3b64;
+      white-space: nowrap;
+    }
+
+    .top-info-value {
+      color: #222;
+      word-break: break-word;
+    }
+
     @media (max-width: 768px) {
       .input-grid {
         grid-template-columns: repeat(2, 1fr);
       }
 
+      .top-card-inner {
+        flex-direction: column;
+      }
+
       .top-brand {
         flex-direction: column;
         align-items: flex-start;
+      }
+
+      .top-info-box {
+        min-width: 100%;
+        max-width: 100%;
+        border-radius: 16px;
       }
     }
 
@@ -233,12 +295,20 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="top-brand">
-        <img src="./SK_LOGO.png" alt="SK Logo" class="logo">
-        <h1>Pilot Currency Checker</h1>
-      </div>
-      <div class="muted">
-        Select a pilot, enter the values, and click the "Calculate" button to update the results.
+      <div class="top-card-inner">
+        <div class="top-card-left">
+          <div class="top-brand">
+            <img src="./SK_LOGO.png" alt="SK Logo" class="logo">
+            <h1>Pilot Currency Checker</h1>
+          </div>
+          <div class="muted">
+            Select a pilot, enter the values, and click the "Calculate" button to update the results.
+          </div>
+        </div>
+
+        <div class="top-info-box" id="topInfoBox">
+          <div class="top-info-loading">Loading...</div>
+        </div>
       </div>
     </div>
 
@@ -425,6 +495,34 @@
       `;
     }
 
+    function renderTopInfo(values) {
+      const box = document.getElementById("topInfoBox");
+
+      if (!Array.isArray(values) || values.length === 0) {
+        box.innerHTML = `<div class="top-info-loading">No data</div>`;
+        return;
+      }
+
+      let html = `<table class="top-info-table">`;
+
+      values.forEach(row => {
+        const c1 = row[0] ?? "";
+        const c2 = row[1] ?? "";
+        const c3 = row[2] ?? "";
+
+        html += `
+          <tr>
+            <td class="top-info-label">${escapeHtml(c1)}</td>
+            <td class="top-info-value">${escapeHtml(c2)}</td>
+            <td class="top-info-value">${escapeHtml(c3)}</td>
+          </tr>
+        `;
+      });
+
+      html += `</table>`;
+      box.innerHTML = html;
+    }
+
     async function callApi(payload) {
       const res = await fetch(API_URL, {
         method: "POST",
@@ -450,7 +548,7 @@
           throw new Error("Another user is currently running a calculation. Please try again in a moment.");
         }
 
-        throw new Error("An error occurred while processing the request.");
+        throw new Error(rawMessage || "An error occurred while processing the request.");
       }
       return json;
     }
@@ -483,6 +581,19 @@
         select.innerHTML = '<option value="">Failed to load list</option>';
         status.className = "status err";
         status.textContent = err.message;
+      }
+    }
+
+    async function loadTopInfo() {
+      try {
+        const result = await callApi({
+          action: "getTopInfo"
+        });
+
+        renderTopInfo(result.values || []);
+      } catch (err) {
+        document.getElementById("topInfoBox").innerHTML =
+          `<div class="top-info-loading">${escapeHtml(err.message)}</div>`;
       }
     }
 
@@ -577,6 +688,7 @@
     buildInputGrid();
     clearInputFields();
     loadPilotList();
+    loadTopInfo();
     resetInputsOnSheet();
   </script>
 </body>
