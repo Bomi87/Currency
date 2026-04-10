@@ -213,14 +213,16 @@
 }
 
 .top-info-label {
-  width: 1%;
+  width: 90px;
+  min-width: 90px;
   font-weight: 700;
   color: #7b2cff;
   white-space: nowrap;
 }
 
 .top-info-mid {
-  width: 1%;
+  width: 140px;
+  min-width: 140px;
   color: #7b2cff;
   white-space: nowrap;
   font-weight: 700;
@@ -511,7 +513,7 @@
 
    html += `
   <tr>
-    <td class="top-info-label">✈️ ${escapeHtml(c1)}</td>
+  <td class="top-info-label">✈️&nbsp;${escapeHtml(c1)}</td>
     <td class="top-info-mid">${escapeHtml(c2)}</td>
     <td class="top-info-value">${escapeHtml(c3)}</td>
   </tr>
