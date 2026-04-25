@@ -171,6 +171,15 @@
       text-decoration: underline;
     }
 
+    /* DUE DATE 색상 조건 */
+    .due-date-red {
+      color: #d93025 !important;
+    }
+
+    .due-date-orange {
+      color: #f59e0b !important;
+    }
+
     .night-value {
       color: #1f6feb;
       font-weight: normal;
@@ -241,7 +250,6 @@
       white-space: nowrap;
     }
 
-    /* 추가 */
     .search-status-row {
       margin-top: 10px;
       display: flex;
@@ -370,7 +378,6 @@
         </div>
       </div>
 
-      <!-- 여기 추가 -->
       <div class="search-status-row">
         <div id="searchStatus" class="status"></div>
         <button type="button" id="retrySearchBtn" class="retry-btn" onclick="retryPilotSearch()">
@@ -511,6 +518,48 @@
         .join(" / ");
     }
 
+    function getTodayKSTDateOnly() {
+      const now = new Date();
+
+      const kst = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Seoul"
+        })
+      );
+
+      return new Date(kst.getFullYear(), kst.getMonth(), kst.getDate());
+    }
+
+    function getDueDateClass(dueDateStr) {
+      if (!dueDateStr) return "";
+
+      const parts = String(dueDateStr).split("-");
+      if (parts.length !== 3) return "";
+
+      const y = Number(parts[0]);
+      const m = Number(parts[1]) - 1;
+      const d = Number(parts[2]);
+
+      if (!y || isNaN(m) || !d) return "";
+
+      const dueDate = new Date(y, m, d);
+      const today = getTodayKSTDateOnly();
+
+      const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+
+      // 해당 날짜 - 오늘 <= 7 : 빨강
+      if (diffDays <= 7) {
+        return "due-date-red";
+      }
+
+      // 7 < 해당 날짜 - 오늘 <= 14 : 주황
+      if (diffDays > 7 && diffDays <= 14) {
+        return "due-date-orange";
+      }
+
+      return "";
+    }
+
     function renderResult(data) {
       const result = document.getElementById("result");
 
@@ -518,6 +567,7 @@
       const nightTO = styleDateList(data.nightTO || [], "night-value");
       const dayLD = styleDateList(data.dayLD || []);
       const nightLD = styleDateList(data.nightLD || [], "night-value");
+      const dueDateClass = getDueDateClass(data.dueDateMain);
 
       result.innerHTML = `
         <div class="result-line">
@@ -525,7 +575,7 @@
         </div>
         <div class="result-line">
           ✈️ <strong>DUE DATE:</strong>
-          <span class="due-date-value">
+          <span class="due-date-value ${dueDateClass}">
             ${escapeHtml(data.dueDateMain || "")} (${escapeHtml(data.dueDateSub || "")})
           </span>
         </div>
