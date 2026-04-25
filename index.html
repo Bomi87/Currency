@@ -171,7 +171,6 @@
       text-decoration: underline;
     }
 
-    /* DUE DATE 색상 조건 */
     .due-date-red {
       color: #d93025 !important;
     }
@@ -262,6 +261,27 @@
       margin-top: 0;
     }
 
+    .refresh-btn {
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      padding: 0;
+      border-radius: 999px;
+      background: #eef4ff;
+      color: #1f6feb;
+      border: 1px solid #cfe0ff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .refresh-btn:hover {
+      background: #dfeaff;
+    }
+
     .retry-btn {
       padding: 7px 12px;
       font-size: 13px;
@@ -345,6 +365,13 @@
         padding: 6px 10px;
         font-size: 12px;
       }
+
+      .refresh-btn {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        font-size: 17px;
+      }
     }
   </style>
 </head>
@@ -380,6 +407,18 @@
 
       <div class="search-status-row">
         <div id="searchStatus" class="status"></div>
+
+        <button
+          type="button"
+          id="refreshSearchBtn"
+          class="refresh-btn"
+          onclick="refreshPilotSearch()"
+          title="Refresh"
+          aria-label="Refresh"
+        >
+          ↻
+        </button>
+
         <button type="button" id="retrySearchBtn" class="retry-btn" onclick="retryPilotSearch()">
           Retry
         </button>
@@ -414,6 +453,8 @@
       { key: "R", title: "L/D-Day", night: false },
       { key: "S", title: "L/D-Night", night: true }
     ];
+
+    let pilotSearchController = null;
 
     function buildInputGrid() {
       const grid = document.getElementById("inputGrid");
@@ -547,12 +588,10 @@
 
       const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
 
-      // 해당 날짜 - 오늘 <= 7 : 빨강
       if (diffDays <= 7) {
         return "due-date-red";
       }
 
-      // 7 < 해당 날짜 - 오늘 <= 14 : 주황
       if (diffDays > 7 && diffDays <= 14) {
         return "due-date-orange";
       }
@@ -631,13 +670,27 @@
       btn.disabled = false;
     }
 
-    async function callApi(payload) {
+    function setRefreshButtonLoading(isLoading) {
+      const btn = document.getElementById("refreshSearchBtn");
+      btn.disabled = isLoading;
+      btn.textContent = isLoading ? "…" : "↻";
+    }
+
+    function abortCurrentPilotSearch() {
+      if (pilotSearchController) {
+        pilotSearchController.abort();
+        pilotSearchController = null;
+      }
+    }
+
+    async function callApi(payload, options = {}) {
       const res = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "text/plain;charset=utf-8"
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: options.signal
       });
 
       const text = await res.text();
@@ -717,6 +770,20 @@
       }
     }
 
+    async function refreshPilotSearch() {
+      const pilotName = document.getElementById("pilotSelect").value;
+      const status = document.getElementById("searchStatus");
+
+      if (!pilotName) {
+        status.className = "status";
+        status.textContent = "Refreshing pilot list...";
+        await loadPilotList();
+        return;
+      }
+
+      await handlePilotChange(false, true);
+    }
+
     async function retryPilotSearch() {
       const pilotName = document.getElementById("pilotSelect").value;
       const status = document.getElementById("searchStatus");
@@ -728,46 +795,72 @@
       status.className = "status";
       status.textContent = "Retrying...";
 
-      await handlePilotChange(true);
+      await handlePilotChange(true, false);
     }
 
-    async function handlePilotChange(isRetry = false) {
+    async function handlePilotChange(isRetry = false, isRefresh = false) {
       const pilotName = document.getElementById("pilotSelect").value;
       const status = document.getElementById("searchStatus");
 
       if (!pilotName) {
+        abortCurrentPilotSearch();
         clearInputFields();
         document.getElementById("result").textContent = "Search results will be displayed here.";
         status.className = "status";
         status.textContent = "";
         setRetryButton(false);
+        setRefreshButtonLoading(false);
         return;
       }
 
+      const controller = new AbortController();
+
       try {
+        abortCurrentPilotSearch();
+        pilotSearchController = controller;
+
         setRetryButton(false);
+        setRefreshButtonLoading(true);
         status.className = "status";
-        status.textContent = isRetry ? "Retrying..." : "Searching...";
+        status.textContent = isRefresh ? "Refreshing..." : (isRetry ? "Retrying..." : "Searching...");
 
         clearInputFields();
 
-        const result = await callApi({
-          action: "search",
-          pilotName
-        });
+        const result = await callApi(
+          {
+            action: "search",
+            pilotName
+          },
+          {
+            signal: controller.signal
+          }
+        );
+
+        if (pilotSearchController !== controller) return;
 
         renderResult(result.data);
         setInputValues(result.data.inputValues || []);
 
         status.className = "status ok";
-        status.textContent = "Search completed.";
+        status.textContent = isRefresh ? "Refreshed." : "Search completed.";
         setRetryButton(false);
       } catch (err) {
+        if (err.name === "AbortError") {
+          return;
+        }
+
+        if (pilotSearchController !== controller) return;
+
         status.className = "status err";
         status.textContent = err.message || "Load fail";
 
         if (pilotName) {
           setRetryButton(true);
+        }
+      } finally {
+        if (pilotSearchController === controller) {
+          pilotSearchController = null;
+          setRefreshButtonLoading(false);
         }
       }
     }
@@ -808,6 +901,8 @@
     }
 
     window.addEventListener("beforeunload", function () {
+      abortCurrentPilotSearch();
+
       navigator.sendBeacon(
         API_URL,
         new Blob([JSON.stringify({ action: "resetInputs" })], {
