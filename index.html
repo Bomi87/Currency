@@ -760,15 +760,7 @@
       }
     }
 
-    async function resetInputsOnSheet() {
-      try {
-        await callApi({
-          action: "resetInputs"
-        });
-      } catch (err) {
-        console.error("resetInputs error:", err);
-      }
-    }
+  
 
     async function refreshPilotSearch() {
       const pilotName = document.getElementById("pilotSelect").value;
@@ -900,22 +892,13 @@
       }
     }
 
-    window.addEventListener("beforeunload", function () {
-      abortCurrentPilotSearch();
-
-      navigator.sendBeacon(
-        API_URL,
-        new Blob([JSON.stringify({ action: "resetInputs" })], {
-          type: "text/plain;charset=utf-8"
-        })
-      );
-    });
+   
 
     buildInputGrid();
     clearInputFields();
     loadPilotList();
     loadTopInfo();
-    resetInputsOnSheet();
+   
   </script>
 </body>
 </html>
